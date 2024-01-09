@@ -1,5 +1,4 @@
 const db = require("../db")
-const bcrypt = require('bcrypt');
 
 const getUsers = async (req, res) => {
   try {
@@ -32,21 +31,21 @@ const getUser = async (req,res) => {
 
 const loginUser = async (req, res) => {
     try {
+    console.log('Received a request to /api/users/login');
       const {firstName, lastName, password } = req.body;
   
       // Query the database to get user by firstName and lastName
       const q = 'SELECT * FROM claims.user WHERE firstName = ? AND lastName = ?';
       const user = await db.query(q, [firstName, lastName]);
-      if (!user) {
+      if (!user || user.length == 0) {
         // If user is not found, send an authentication failure response
         res.status(401).send('No user found');
         return;
       }
   
       // Compare the entered password with the hashed password in the database
-      const passwordMatch = await bcrypt.compare(password, user.Password);
   
-      if (!passwordMatch) {
+      if (password != user[0].Password) {
         // If passwords do not match, send an authentication failure response
         res.status(401).send('Wrong password');
         return;
